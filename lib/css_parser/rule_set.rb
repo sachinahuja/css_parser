@@ -9,8 +9,12 @@ module CssParser
     
     # Integer with the specificity to use for this RuleSet.
     attr_accessor   :specificity
+    attr_reader :compass_instructions
 
     def initialize(selectors, block, specificity = nil)
+      # FIX For MOOFWD
+      block = block.gsub('$','')
+      @compass_instructions = []
       @selectors = []
       @specificity = specificity
       @declarations = {}
@@ -19,8 +23,12 @@ module CssParser
       parse_declarations!(block)
     end
 
-
-    # Get the value of a property
+    #MOOFWD - extension to add COMPASS instructions
+        def add_compass_instructions instruction
+              @compass_instructions << instruction
+            end
+    
+    #Get the value of a property
     def get_value(property)
       return '' unless property and not property.empty?
 
@@ -108,6 +116,9 @@ module CssParser
      each_declaration do |prop, val, is_important|
        importance = (options[:force_important] || is_important) ? ' !important' : ''
        str += "#{prop}: #{val}#{importance}; "
+     end
+     @compass_instructions.each do |comp|
+        str += "#{comp};"
      end
      str.gsub(/^[\s]+|[\n\r\f\t]*|[\s]+$/mx, '').strip
     end
